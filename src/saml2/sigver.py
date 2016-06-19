@@ -1117,6 +1117,10 @@ def security_context(conf, debug=None):
     if _only_md is None:
         _only_md = False
 
+    _only_assertions = conf.only_use_keys_in_assertions
+    if _only_assertions is None:
+        _only_assertions = False
+
     sec_backend = None
 
     if conf.crypto_backend == 'xmlsec1':
@@ -1160,6 +1164,7 @@ def security_context(conf, debug=None):
     return SecurityContext(
         crypto, conf.key_file, cert_file=conf.cert_file, metadata=metadata,
         debug=debug, only_use_keys_in_metadata=_only_md,
+        only_use_keys_in_assertions=_only_assertions,
         cert_handler_extra_class=conf.cert_handler_extra_class,
         generate_cert_info=conf.generate_cert_info,
         tmp_cert_file=conf.tmp_cert_file,
@@ -1346,7 +1351,8 @@ class SecurityContext(object):
     def __init__(self, crypto, key_file="", key_type="pem",
                  cert_file="", cert_type="pem", metadata=None,
                  debug=False, template="", encrypt_key_type="des-192",
-                 only_use_keys_in_metadata=False, cert_handler_extra_class=None,
+                 only_use_keys_in_metadata=False, only_use_keys_in_assertions=False,
+                 cert_handler_extra_class=None,
                  generate_cert_info=None, tmp_cert_file=None,
                  tmp_key_file=None, validate_certificate=None,
                  enc_key_files=None, enc_key_type="pem",
@@ -1387,6 +1393,7 @@ class SecurityContext(object):
 
         self.metadata = metadata
         self.only_use_keys_in_metadata = only_use_keys_in_metadata
+        self.only_use_keys_in_assertions = only_use_keys_in_assertions
         self.debug = debug
 
         if not template:
@@ -1521,8 +1528,9 @@ class SecurityContext(object):
                 _issuer = issuer.text.strip()
             except AttributeError:
                 _issuer = None
+
         # More trust in certs from metadata then certs in the XML document
-        if self.metadata:
+        if self.metadata and not self.only_use_keys_in_assertions:
             try:
                 _certs = self.metadata.certs(_issuer, "any", "signing")
             except KeyError:

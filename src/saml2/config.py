@@ -37,6 +37,7 @@ COMMON_ARGS = [
     "virtual_organization",
     "logger",
     "only_use_keys_in_metadata",
+    "only_use_keys_in_assertions",
     "disable_ssl_certificate_validation",
     "preferred_binding",
     "session_storage",
@@ -189,6 +190,7 @@ class Config(object):
         self.virtual_organization = None
         self.logger = None
         self.only_use_keys_in_metadata = True
+        self.only_use_keys_in_assertions = False
         self.logout_requests_signed = None
         self.disable_ssl_certificate_validation = None
         self.context = ""
